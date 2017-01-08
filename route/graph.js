@@ -85,12 +85,16 @@ function getCompanyRelation(seedIds, mCallback){
   function(err,results){
     console.log(results);
     mCallback(err, ans);
+    console.log(sqlOwn(['12863348','86517384']));
   });
 
 }
 
 /** sql help method */
 function sqlOwn(seedid){
+  if (typeof(seedid)==='object'){
+    seedid = seedid.toString();
+  }
   var sql_own =
   `
   select a.ID, a.公司名稱 , b.所代表法人ID, b.所代表法人,count(*) value
@@ -101,10 +105,14 @@ function sqlOwn(seedid){
   where b.所代表法人ID = '${seedid}'
   group by a.ID,a.公司名稱,b.所代表法人 ,b.所代表法人ID
   `;
+}
   return sql_own
 }
 
 function sqlBelong(seedid){
+  if (typeof(seedid)==='object'){
+    seedid = seedid.toString();
+  }
   var sql_temp =
   `
   select a.ID,a.公司名稱  , b.所代表法人ID,b.所代表法人  ,count(*) value
@@ -112,7 +120,7 @@ function sqlBelong(seedid){
   dbo.公司法人資料 a
   left join dbo.公司董監事 b
   on a.ID = b.ID
-  where a.ID = '${seedid}'
+  where a.ID in ('${seedid}')
   group by a.ID,a.公司名稱,b.所代表法人 ,b.所代表法人ID
   `;
   return sql_temp
