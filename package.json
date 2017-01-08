@@ -1,0 +1,30 @@
+{
+  "name": "company-graph",
+  "version": "0.0.1",
+  "description": "[ ] 試作d3js力圖layout(測試)\r [ ] 引用資料庫資料(nodejs-API設計)\r [ ] 查詢視窗/前端串接",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ihongChen/company-graph.git"
+  },
+  "keywords": [
+    "graph",
+    "d3js",
+    "force",
+    "diagram"
+  ],
+  "author": "ihong",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ihongChen/company-graph/issues"
+  },
+  "homepage": "https://github.com/ihongChen/company-graph#readme",
+  "dependencies": {
+    "async": "^2.1.4",
+    "express": "^4.14.0",
+    "mssql": "^3.3.0"
+  }
+}
