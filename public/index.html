@@ -1,7 +1,17 @@
 <!DOCTYPE html>
-<html>
-  <meta charset="utf-8">
-  <body>
-    <h2>Hello... Company-Graph</h2>
+
+<html ng-app="companyGraph">
+  <head>
+    <meta charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <title>公司關係圖</title>
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body ng-controller="MainCtrl">
+    <h1>公司關係圖</h1>
+    公司統編：<input type=text ng-model="ID">
+    <button ng-click="getCompany(ID)">搜尋</button>
+    <script src="graph_d3.js"></script>
   </body>
 </html>
