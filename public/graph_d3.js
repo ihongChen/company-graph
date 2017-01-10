@@ -6,8 +6,8 @@ function MainCtrl($scope){
 
   $scope.ID = "86517384";  
 
-  $scope.getCompany = function(ID){
-  var hostUrl = "http://localhost:5000/q" + "?id=" + ID;    
+  $scope.getGraph = function(ID){
+  var hostUrl = "http://localhost:5000/q" + "?id=" + ID;
   d3.json(hostUrl,function(err,links){
     var nodes = {};
 
@@ -21,15 +21,16 @@ function MainCtrl($scope){
       (nodes[link.target] = {name: link.target});
       link.value = +link.value;
     });
-
+    console.log(nodes);
+    // console.log(links);
     var width = 960,
         height = 500
     var force = d3.layout.force()
                   .nodes(d3.values(nodes))
                   .links(links)
                   .size([width,height])
-                  .linkDistance(60)
-                  .charge(-300)
+                  .linkDistance(100)
+                  .charge(-500)
                   .on('tick',tick)
                   .start()
     // set the range
@@ -38,7 +39,7 @@ function MainCtrl($scope){
     v.domain([0, d3.max(links, function(d) { return d.value; })]);
     // asign a type per value to encode opacity
     links.forEach(function(link) {
-        console.log(v(link.value));
+        // console.log(v(link.value));
         if (v(link.value) <= 25) {
             link.type = "twofive";
         } else if (v(link.value) <= 50 && v(link.value) > 25) {
@@ -151,5 +152,5 @@ function MainCtrl($scope){
 
   }
 
-  $scope.getCompany($scope.ID);
+  $scope.getGraph($scope.ID);
 }

@@ -5,10 +5,10 @@ var app = express()
 var sql=require('mssql');
 // database config
 var config = {
-    user: 'sa',
-    password: 'xxxxxxx',
-    server: 'dbm_public',
-    database: 'xxxxxx',
+    user: 'xxx',
+    password: 'xxxxxx',
+    server: 'xxxxxxxxx',
+    database: 'External',
     options: {
         tdsVersion:'7_1',
         encrypt: false // Use this if you're on Windows Azure
@@ -23,6 +23,7 @@ var graph = require('./route/graph') //api route
 
 app.use(express.static(__dirname + "/public"));
 app.get('/q', graph.getGraph);
+
 
 // connect the pool and start web server 
 cp.connect().then(function(){
