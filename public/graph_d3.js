@@ -7,8 +7,8 @@ function MainCtrl($scope, $http){
   $scope.ID = "86517384";
 
   $scope.getGraph = function(ID){
-    var hostUrl = "http://localhost:5000/fakeGraph?id=86517384";
-    //var hostUrl = "http://localhost:5000/q" + "?id=" + ID;
+    // var hostUrl = "http://localhost:5000/fakeGraph?id=86517384";
+    var hostUrl = "http://localhost:5000/q" + "?id=" + ID;
     d3.json(hostUrl,function(err,links){
       var nodes = {};
 
@@ -24,8 +24,15 @@ function MainCtrl($scope, $http){
       });
       console.log("nodes: " + JSON.stringify(nodes));
       // console.log(links);
+
+      // define div for tooltips 
+      var div = d3.select("body").append("div") 
+        .attr("class", "tooltip")       
+        .style("opacity", 0);
+
       var width = 960,
-      height = 500
+          height = 500;
+
       var force = d3.layout.force()
                   .nodes(d3.values(nodes))
                   .links(links)
@@ -34,6 +41,7 @@ function MainCtrl($scope, $http){
                   .charge(-500)
                   .on('tick',tick)
                   .start();
+                  
       // set the range
       var v = d3.scale.linear().range([0, 100]);
       // Scale the range of the data
@@ -181,7 +189,7 @@ function dblclick() {
 function handleMouseOut(d, i) {
   // Select text by id and then remove
   var idTag = "#t" + d.x + "-" + d.y + "-" + i;
-  console.log("idTag: "+idTag);
+  // console.log("idTag: "+idTag);
   //d3.select("#t" + d.x + "-" + d.y + "-" + i).remove();  // Remove text location
   d3.select(".newtag").remove();  // Remove text location
 }
@@ -190,8 +198,8 @@ function handleMouseOut(d, i) {
 function getCompany($http, id){
   $http.get("http://localhost:5000/company/"+id)
   .then(function(response) {
-    console.log("response: "+JSON.stringify(response));
-    d3.select(".newtag").text(companyToString(response.data));
+    console.log("response: "+JSON.stringify(response.data[0]));
+    d3.select(".newtag").text(companyToString(response.data[0]));
   });
 }
 

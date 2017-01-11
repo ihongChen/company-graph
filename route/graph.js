@@ -3,10 +3,12 @@ var sql = require('mssql');
 
 
 module.exports = {
-  getGraph: getGraphAction
+  getGraph: getGraphAction,
+  getCompany : getCompanyAction
 }
-
-
+  /******************/
+  /**取得關係圖結構 */
+  /******************/
 function getGraphAction(req,res){
 
   var query = req.query;
@@ -24,7 +26,7 @@ function getGraphAction(req,res){
   }
 
 
-  /***/
+
   getCompanyRelation(seedid,function(err,ans){
     if (err){
       throw err;
@@ -59,25 +61,6 @@ function getGraphAction(req,res){
           finalResults = finalResults.concat(ans2);
           res.send(finalResults);
 
-          /* find thirdSeedIds*/
-          for (var index in ans2){
-            if (ans2[index].sourceId !== null && ans2[index].targetId!==null){
-              thirdSeedIds.push(ans2[index].sourceId.trim());
-              thirdSeedIds.push(ans2[index].targetId.trim());
-            }
-          }
-          thirdSeedIds = thirdSeedIds.filter(onlyUnique);
-          var seedid_index = thirdSeedIds.indexOf(secondSeedIds);
-          if (~seedid_index) thirdSeedIds.splice(seedid_index,1);
-          companyIds = thirdSeedIds.concat(secondSeedIds);
-          companyIds = companyIds.concat(seedid).filter(onlyUnique);
-          console.log(thirdSeedIds);
-          console.log('length of thirdSeedIds :%s',thirdSeedIds.length);
-          console.log('length of companyIds :%s',companyIds.length);
-
-          // 要如何返回此值(companyIds)??丟到新的router做查詢呢?
-          getCompanyInfo(companyIds);
-
         }
         // console.log(finalResults);
       });
@@ -85,8 +68,25 @@ function getGraphAction(req,res){
   });
 }
 
+/**********************************************************/
+/**取得公司資料*******************************************/
+/*********************************************************/
 
-/** query help method */
+function getCompanyAction(req,res){
+  var id = req.params.id;
+  console.log(id);
+  getCompanyInfo(id,function(err,ans){
+    if (err) throw err;
+    res.send(ans);
+  })
+}
+
+
+/******************************************************/
+/** query help method ********************************/
+/******************************************************/
+
+/** 單層公司關係結構*/
 function getCompanyRelation(seedid, mCallback){
 
   var request = new sql.Request(cp);
@@ -128,21 +128,47 @@ function getCompanyRelation(seedid, mCallback){
 
 }
 
-function getCompanyInfo(seedids){
+/** 公司詳細資料 */ 
+
+
+function getCompanyInfo(id,mCallback){
   var request = new sql.Request(cp);
   var ans = [];
-  request.query(sqlCompany(seedids),function(err,data){
-    if (err){
-      throw err;
+  async.series(
+    [
+      function(callback){
+        request.query(sqlCompanyInfo(id),function(err,data1){
+          if (err){
+            return callback(err,null);
+          }
+          ans = ans.concat(data1);
+          callback(null,data1);
+        });
+      }
+      ,
+      function (callback){
+        request.query(sqlCompanyDirectors(id),function(err,data2){
+          if (err){
+            return callback(err,null);
+          }else{
+            if (ans[0]!==undefined) ans[0]['董監事名單'] = data2;
+            callback(null,data2);
+          }
+          
+        })
+      }
+    ],function(err,results){
+      console.log(results);
+      mCallback(err,ans);
     }
-    
-  });
-
+  );
 }
 
 
+/***********************************/
+/********* sql help method *********/
+/***********************************/
 
-/** sql help method */
 function sqlOwn(seedid){
   if (seedid instanceof Array){
     seedid = seedid.join('\',\'');
@@ -177,17 +203,28 @@ function sqlBelong(seedid){
   return sql_temp;
 }
 
-function sqlCompany(seedids){
-  if (seedids instanceof Array){
-    seedids = seedids.join('\',\'')
-  }
-  var sql_company = 
+function sqlCompanyDirectors(seedid){
+
+  var sql_director = 
   `select a.公司名稱,b.*
   from external.dbo.公司法人資料 a
     left join external.dbo.公司董監事 b
       on a.ID = b.ID
-  where a.ID in ('${seedids}') ` 
-  return sql_company;
+  where a.ID = '${seedid}' ` ;
+  return sql_director;
+}
+
+
+function sqlCompanyInfo(seedid){
+
+  var sql_company_info = 
+  `
+  select 公司名稱,公司所在地
+  from 
+  公司法人資料
+  where ID = '${seedid}'
+  `;
+  return sql_company_info;
 }
 
 
