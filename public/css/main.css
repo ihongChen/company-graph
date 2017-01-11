@@ -31,3 +31,17 @@ text {
   font: 10px sans-serif;
   pointer-events: none;
 }
+
+
+div.tooltip { 
+    position: absolute;     
+    text-align: left;     
+    /*width: 500px;          */
+    height: 100px;         
+    padding: 10px;       
+    font: 12px sans-serif;    
+    background: #C0C0C0; 
+    border: 2px;    
+    border-radius: 8px;     
+    pointer-events: none;     
+}

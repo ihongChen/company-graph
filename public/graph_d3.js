@@ -25,11 +25,6 @@ function MainCtrl($scope, $http){
       console.log("nodes: " + JSON.stringify(nodes));
       // console.log(links);
 
-      // define div for tooltips 
-      var div = d3.select("body").append("div") 
-        .attr("class", "tooltip")       
-        .style("opacity", 0);
-
       var width = 960,
           height = 500;
 
@@ -38,10 +33,11 @@ function MainCtrl($scope, $http){
                   .links(links)
                   .size([width,height])
                   .linkDistance(100)
-                  .charge(-500)
+                  .charge(-500)                  
                   .on('tick',tick)
-                  .start();
-                  
+                  .start()
+                  ;
+
       // set the range
       var v = d3.scale.linear().range([0, 100]);
       // Scale the range of the data
@@ -101,8 +97,15 @@ function MainCtrl($scope, $http){
       .on("dblclick", dblclick)
       .call(force.drag);
 
+
       //TODO:FOR TEST
-      console.log("force.nodes: "+JSON.stringify(force.nodes()));
+      // console.log("force.nodes: "+JSON.stringify(force.nodes()));
+
+      // var drag = force.drag()
+      //               .on("dragstart",function dragstart(d) {
+      //                                 d3.select(this).classed("fixed", d.fixed = false);
+      //                               }
+      //                   );
 
       // add the nodes
       node.append("circle")
@@ -113,6 +116,8 @@ function MainCtrl($scope, $http){
       .attr("x", 12)
       .attr("dy", ".35em")
       .text(function(d) { return d.name; });
+
+
       // add the curvy lines
       function tick() {
         path.attr("d", function(d) {
@@ -135,17 +140,49 @@ function MainCtrl($scope, $http){
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {  // Add interactivity
           // Specify where to put label of text
-          svg.append("text").attr({
-            class: "newtag",
-            id: "t" + d.x + "-" + d.y + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
-            x: function() { return d.x - 30; },
-            y: function() { return d.y - 15; }
-          })
-          .text(function() {
-            return [d.id, d.name];  // Value of the text
-          });
+          // svg.append("text").attr({
+          //   class: "newtag",
+          //   id: "t" + d.x + "-" + d.y + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
+          //   x: function() { return d.x - 30; },
+          //   y: function() { return d.y - 15; }
+          // })
+          // .text(function() {
+          //   return [d.id, d.name];  // Value of the text
+          // });
+                // define div for tooltips 
+          var div = d3.select("body").append("div") 
+            .attr("class", "tooltip")       
+            .style("opacity", 0);
 
-          getCompany($http, d.id);
+          // div.transition()
+          //     .duration(100)
+          //     .style("opacity",.9);
+          // div.html(d.name + "<br/>" + d.id)
+          //     .style("left", (d3.event.pageX) + "px")                
+          //     .style("top", (d3.event.pageY - 28) + "px");  
+                
+          // console.log("d.x:"+d.x);
+
+           $http.get("http://localhost:5000/company/"+d.id)
+                  .then(function(response) {
+                    // console.log("response: "+JSON.stringify(response.data[0]));
+
+                    var company_data = companyToString(response.data[0]);
+                    // console.log(company_data[1]);
+
+                    div.transition()
+                        .duration(100)
+                        .style("opacity",.9);
+                    div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
+                              +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
+                        .style("left", (d.x) + "px")                
+                        .style("top", (d.y - 28) + "px")
+                        .style("width", "470px")                        
+                        .style("height", (company_data[1]*18 + 100) +"px" );
+
+                    // d3.select(".tooltip").text(companyToString(response.data[0]));
+                  });
+          // getCompany($http, d.id);
         }
 
       });
@@ -191,26 +228,43 @@ function handleMouseOut(d, i) {
   var idTag = "#t" + d.x + "-" + d.y + "-" + i;
   // console.log("idTag: "+idTag);
   //d3.select("#t" + d.x + "-" + d.y + "-" + i).remove();  // Remove text location
-  d3.select(".newtag").remove();  // Remove text location
+  d3.select(".tooltip").remove();  // Remove text location
 }
 
-//http request
-function getCompany($http, id){
-  $http.get("http://localhost:5000/company/"+id)
-  .then(function(response) {
-    console.log("response: "+JSON.stringify(response.data[0]));
-    d3.select(".newtag").text(companyToString(response.data[0]));
-  });
-}
+
+
+
 
 //help method
+// function companyToString(response){
+//   var print = "";
+//   for(var index in response) {
+//     console.log(index);
+//     if (response.hasOwnProperty(index)) {
+//       var value = response[index];
+      
+//       if (index==='董監事名單' && response['董監事名單']!= null){
+//         for (var index in response['董監事名單']){
+//           var value = response['董監事名單'][index];
+//           print += index + " : " + value + "<br/>";
+//         }
+//       }
+//     }
+//   }
+//   return print;
+// }
+
 function companyToString(response){
-  var print = "";
-  for(var index in response) {
-    if (response.hasOwnProperty(index)) {
-      var value = response[index];
-      print += index + " : " + value + "<br/>";
-    }
+  // console.log("json.stringify type:"+JSON.stringify(response));
+  var pprint = "";
+  for(var index in response['董監事名單']){
+    var director = response['董監事名單'][index];
+    var print = 
+      '姓名: '+ director['姓名'] + ', 職稱: ' + director['職稱'] + ', 所代表法人: ' + 
+      director['所代表法人'] + '(' + director['所代表法人ID'] +')' ;
+    // console.log(print);
+    pprint += print + "<br/>" ;
   }
-  return print;
+  var height = pprint.split('<br/>').length;
+  return [pprint , height]; //return pprint and 'height' of data
 }

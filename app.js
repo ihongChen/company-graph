@@ -5,10 +5,10 @@ var app = express()
 var sql=require('mssql');
 // database config
 var config = {
-    user: 'xxx',
-    password: 'xxxxx',
-    server: 'xxxx',
-    database: 'xxxx',
+    user: 'xxxxx',
+    password: 'xxxxxxx',
+    server: 'xxxxxxx',
+    database: 'xxxxxxxx',
     options: {
         tdsVersion:'7_1',
         encrypt: false // Use this if you're on Windows Azure
