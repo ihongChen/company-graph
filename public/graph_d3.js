@@ -1,7 +1,7 @@
 /** front-end d3js */
 // get the data
 
-var app = angular.module("companyGraph", []); 
+var app = angular.module("companyGraph", []);
 
 
 
@@ -37,7 +37,7 @@ function MainCtrl($scope, $http){
                   .links(links)
                   .size([width,height])
                   .linkDistance(100)
-                  .charge(-350)                                    
+                  .charge(-350)
                   .on('tick',tick)
                   .start();
 
@@ -63,7 +63,7 @@ function MainCtrl($scope, $http){
         d.px += d3.event.dx;
         d.py += d3.event.dy;
         d.x += d3.event.dx;
-        d.y += d3.event.dy; 
+        d.y += d3.event.dy;
         tick(); // this is the key to make it work together with updating both px,py,x,y on d !
       }
 
@@ -80,7 +80,7 @@ function MainCtrl($scope, $http){
       v.domain([0, d3.max(links, function(d) { return d.value; })]);
       // asign a type per value to encode opacity
       links.forEach(function(link) {
-        
+
         if (v(link.value) <= 25) {
           link.type = "twofive";
         } else if (v(link.value) <= 50 && v(link.value) > 25) {
@@ -131,7 +131,7 @@ function MainCtrl($scope, $http){
       .on("mouseout", handleMouseOut)
       .on("click", click)
       .on("dblclick", dblclick)
-      .call(node_drag);      
+      .call(node_drag);
 
 
 
@@ -145,7 +145,7 @@ function MainCtrl($scope, $http){
       .attr("dy", ".35em")
       .text(function(d) { return d.name; });
 
-      
+
       // add the curvy lines
       function tick() {
         path.attr("d", function(d) {
@@ -190,7 +190,7 @@ function MainCtrl($scope, $http){
            // .style("height",300)
            .attr("class","property");
 
-          
+
                 // .style("opacity",0)
         console.log('this:'+JSON.stringify(this));
         var Company = this.__data__.name;
@@ -218,7 +218,7 @@ function MainCtrl($scope, $http){
                             '最近一年平均餘額'],
                             // ['value',100,300]
                             [`元`, response.data[0]['台外幣總存款'],
-                             response.data[0]['放款總餘額(L+PB+CK)'], 
+                             response.data[0]['放款總餘額(L+PB+CK)'],
                              response.data[0]['最近一個月平均餘額(台外幣總存款)'],
                              response.data[0]['最近三個月平均餘額(台外幣總存款)'],
                              response.data[0]['最近六個月平均餘額(台外幣總存款)'],
@@ -240,7 +240,7 @@ function MainCtrl($scope, $http){
               })
               if (d3.select("#title") !== null){
                   d3.select("#title").remove();
-                  }   
+                  }
               d3.select(".propertyChart").append("text")
                   .attr("id","title")
                   .attr("x", 100 )
@@ -252,9 +252,9 @@ function MainCtrl($scope, $http){
         // Create Event Handlers for mouse
       function handleMouseOver(d, i) {  // Add interactivity
 
-        // define div for tooltips 
-        var div = d3.select("body").append("div") 
-          .attr("class", "tooltip")       
+        // define div for tooltips
+        var div = d3.select("body").append("div")
+          .attr("class", "tooltip")
           .style("opacity", 0);
 
 
@@ -264,20 +264,20 @@ function MainCtrl($scope, $http){
 
                 var company_data = companyToString(response.data[0]);
 
-                  // 
+                  //
                 console.log(JSON.stringify(company_data));
 
                 div.transition()
                     .duration(100)
                     .style("opacity",.9);
-                div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
+                div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"
                           +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
-                    .style("left", (d.x) + "px")                
+                    .style("left", (d.x) + "px")
                     .style("top", (d.y - 28) + "px")
-                    .style("width", "470px")                        
-                    .style("height", (company_data[1]*18 + 100) +"px" );          
+                    .style("width", "470px")
+                    .style("height", (company_data[1]*18 + 100) +"px" );
                 });
-        
+
       }
 
       });
@@ -336,7 +336,7 @@ function handleMouseOut(d, i) {
 
 
 
-/**輔助列印公司資訊 */ 
+/**輔助列印公司資訊 */
 
 
 function companyToString(response){
@@ -344,8 +344,8 @@ function companyToString(response){
   var pprint = "";
   for(var index in response['董監事名單']){
     var director = response['董監事名單'][index];
-    var print = 
-      '姓名: '+ director['姓名'] + ', 職稱: ' + director['職稱'] + ', 所代表法人: ' + 
+    var print =
+      '姓名: '+ director['姓名'] + ', 職稱: ' + director['職稱'] + ', 所代表法人: ' +
       director['所代表法人'] + '(' + director['所代表法人ID'] +')' ;
     // console.log(print);
     pprint += print + "<br/>" ;
@@ -353,4 +353,3 @@ function companyToString(response){
   var height = pprint.split('<br/>').length;
   return [pprint , height]; //return pprint and 'height' of data
 }
-
