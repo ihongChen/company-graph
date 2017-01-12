@@ -6,12 +6,20 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
     <script src="http://d3js.org/d3.v3.js"></script>
     <title>公司關係圖</title>
+    <!-- c3js -->
+    <link href="/css/c3.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/css/main.css">
   </head>
   <body ng-controller="MainCtrl">
     <h1>公司關係圖</h1>
-    公司統編：<input type=text ng-model="ID">
-    <button ng-click="getGraph(ID)">搜尋</button>
-    <script src="graph_d3.js"></script>
+    <div>公司統編：<input type=text ng-model="ID"> 
+      <button ng-click="getGraph(ID)">搜尋</button>
+    </div>
+    <div class= "graphChart"></div>
+    <div class="propertyChart" ></div>
+
+    <script src="./c3.js"></script>
+    <script src="graph_d3.js"></script>    
   </body>
 </html>
+<!-- style="width:700px;height:300px;" -->

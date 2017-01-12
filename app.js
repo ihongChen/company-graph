@@ -3,31 +3,34 @@ var app = express()
 
 //set db
 var sql=require('mssql');
+
 // database config
 var config = {
-    user: 'xxxxx',
-    password: 'xxxxxxx',
+    user: 'xxxx',
+    password: 'xxxxxxxx',
     server: 'xxxxxxx',
-    database: 'xxxxxxxx',
+    database: 'xxxxxxx',
     options: {
         tdsVersion:'7_1',
-        encrypt: false // Use this if you're on Windows Azure
+        encrypt: false 
     }
   };
 
 
 global.cp = new sql.Connection(config); //connection pool
 
-//api router
-var graph = require('./route/graph') //api route
-// var fakeGraph = require('./route/fakeGraph') //api route
+
 
 app.use(express.static(__dirname + "/public"));
+
+/** api router*/
+
+var graph = require('./route/graph'); //api route
+var property = require('./route/property');
+
 app.get('/company/:id', graph.getCompany);
 app.get('/q', graph.getGraph);
-
-// app.get('/fakeGraph/:id', fakeGraph.getCompany);
-// app.get('/fakeGraph', fakeGraph.getGraph);
+app.get('/property/:id', property.getProperty);
 
 
 // connect the pool and start web server
@@ -42,10 +45,3 @@ cp.connect().then(function(){
 }).catch(function(err){
   console.error('Error creating connection pool',err);
 });
-
-// var server =app.listen(5000,function(){
-//   var host = server.address().address;
-//   var port = server.address().port;
-//   console.log('App listen at http://%s:%s',host,port);
-
-// });

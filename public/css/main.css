@@ -1,3 +1,8 @@
+div.propertyChart{
+  width:700px;
+  height:300px;
+}
+
 path.link {
   fill: none;
   stroke: #666;
@@ -37,7 +42,7 @@ div.tooltip {
     position: absolute;     
     text-align: left;     
     /*width: 500px;          */
-    height: 100px;         
+ /*   height: 100px;         */
     padding: 10px;       
     font: 12px sans-serif;    
     background: #C0C0C0; 

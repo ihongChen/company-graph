@@ -1,6 +1,9 @@
 /** front-end d3js */
 // get the data
-var app = angular.module("companyGraph", []); //
+
+var app = angular.module("companyGraph", []); 
+
+
 
 function MainCtrl($scope, $http){
 
@@ -13,9 +16,9 @@ function MainCtrl($scope, $http){
       var nodes = {};
 
       // Compute the distinct nodes from the links.
+
       links.forEach(function(link){
         // console.log(link.source);
-        // var link_prev
         link.source = nodes[link.source] ||
         (nodes[link.source] = {name: link.source, id: link.sourceId});
         link.target = nodes[link.target] ||
@@ -25,18 +28,51 @@ function MainCtrl($scope, $http){
       console.log("nodes: " + JSON.stringify(nodes));
       // console.log(links);
 
-      var width = 960,
+      var width = 750,
           height = 500;
 
       var force = d3.layout.force()
                   .nodes(d3.values(nodes))
+                  .gravity(.05)
                   .links(links)
                   .size([width,height])
                   .linkDistance(100)
-                  .charge(-500)                  
+                  .charge(-350)                                    
                   .on('tick',tick)
-                  .start()
-                  ;
+                  .start();
+
+      //******節點拖拉特效  ******//
+
+      var drag = force.drag()
+        .on("dragstart", dragstart);
+
+      function dragstart(d){
+        d3.select(this).classed("fixed",d.fixed=false);
+      }
+
+      var node_drag = d3.behavior.drag()
+        .on("dragstart", dragstart)
+        .on("drag", dragmove)
+        .on("dragend", dragend);
+
+      function dragstart(d, i) {
+        force.stop() // stops the force auto positioning before you start dragging
+      }
+
+      function dragmove(d, i) {
+        d.px += d3.event.dx;
+        d.py += d3.event.dy;
+        d.x += d3.event.dx;
+        d.y += d3.event.dy; 
+        tick(); // this is the key to make it work together with updating both px,py,x,y on d !
+      }
+
+      function dragend(d, i) {
+        d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
+        tick();
+        force.resume();
+      }
+      //*****************************//
 
       // set the range
       var v = d3.scale.linear().range([0, 100]);
@@ -44,7 +80,7 @@ function MainCtrl($scope, $http){
       v.domain([0, d3.max(links, function(d) { return d.value; })]);
       // asign a type per value to encode opacity
       links.forEach(function(link) {
-        // console.log(v(link.value));
+        
         if (v(link.value) <= 25) {
           link.type = "twofive";
         } else if (v(link.value) <= 50 && v(link.value) > 25) {
@@ -55,12 +91,12 @@ function MainCtrl($scope, $http){
           link.type = "onezerozero";
         }
       });
-
+      // remove svg if exist ...
       if (d3.select("svg") !== null){
         d3.select("svg").remove();
       }
 
-      var svg = d3.select("body")
+      var svg = d3.select(".graphChart")
       .append("svg")
       .attr("width", width)
       .attr("height", height);
@@ -95,17 +131,9 @@ function MainCtrl($scope, $http){
       .on("mouseout", handleMouseOut)
       .on("click", click)
       .on("dblclick", dblclick)
-      .call(force.drag);
+      .call(node_drag);      
 
 
-      //TODO:FOR TEST
-      // console.log("force.nodes: "+JSON.stringify(force.nodes()));
-
-      // var drag = force.drag()
-      //               .on("dragstart",function dragstart(d) {
-      //                                 d3.select(this).classed("fixed", d.fixed = false);
-      //                               }
-      //                   );
 
       // add the nodes
       node.append("circle")
@@ -117,7 +145,7 @@ function MainCtrl($scope, $http){
       .attr("dy", ".35em")
       .text(function(d) { return d.name; });
 
-
+      
       // add the curvy lines
       function tick() {
         path.attr("d", function(d) {
@@ -137,53 +165,120 @@ function MainCtrl($scope, $http){
           return "translate(" + d.x + "," + d.y + ")"; });
       }
 
-        // Create Event Handlers for mouse
-        function handleMouseOver(d, i) {  // Add interactivity
-          // Specify where to put label of text
-          // svg.append("text").attr({
-          //   class: "newtag",
-          //   id: "t" + d.x + "-" + d.y + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
-          //   x: function() { return d.x - 30; },
-          //   y: function() { return d.y - 15; }
-          // })
-          // .text(function() {
-          //   return [d.id, d.name];  // Value of the text
-          // });
-                // define div for tooltips 
-          var div = d3.select("body").append("div") 
-            .attr("class", "tooltip")       
-            .style("opacity", 0);
 
-          // div.transition()
-          //     .duration(100)
-          //     .style("opacity",.9);
-          // div.html(d.name + "<br/>" + d.id)
-          //     .style("left", (d3.event.pageX) + "px")                
-          //     .style("top", (d3.event.pageY - 28) + "px");  
-                
-          // console.log("d.x:"+d.x);
+      // action to take on mouse click
+      function click() {
+        d3.select(this).select("text").transition()
+        .duration(750)
+        .attr("x", 22)
+        .style("fill", "steelblue")
+        .style("stroke", "lightsteelblue")
+        .style("stroke-width", ".5px")
+        .style("font", "20px sans-serif");
+        d3.select(this).select("circle").transition()
+        .duration(750)
+        .attr("r", 16)
+        .style("fill", "lightsteelblue");
 
-           $http.get("http://localhost:5000/company/"+d.id)
-                  .then(function(response) {
-                    // console.log("response: "+JSON.stringify(response.data[0]));
+        // 行內資訊查詢
+        if (d3.select(".property") !== null){
+          d3.select(".property").remove();
+          }
+        d3.select(".propertyChart")
+           .append("div")
+           // .style("width",500)
+           // .style("height",300)
+           .attr("class","property");
 
-                    var company_data = companyToString(response.data[0]);
-                    // console.log(company_data[1]);
+          
+                // .style("opacity",0)
+        console.log('this:'+JSON.stringify(this));
+        var Company = this.__data__.name;
+        console.log("Company :"+JSON.stringify(Company));
+        $http.get("http://localhost:5000/property/"+this.id.trim())
+              .then(function(response){
+                console.log("response: " + JSON.stringify(response));
+                console.log("response.data:"+ JSON.stringify(response.data));
+                // div.html(respnose.data);
+                console.log("response.data['台外幣總存款']:" + response.data[0]['台外幣總存款'] )
+                if (response.data !== undefined){
 
-                    div.transition()
-                        .duration(100)
-                        .style("opacity",.9);
-                    div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
-                              +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
-                        .style("left", (d.x) + "px")                
-                        .style("top", (d.y - 28) + "px")
-                        .style("width", "470px")                        
-                        .style("height", (company_data[1]*18 + 100) +"px" );
+                  var chart = c3.generate({
+                    bindto: '.property',
+                    padding: {
+                              left: 100,
+                              top : 10
+                            },
+                    data: {
+                    x: 'x',
+                    columns:
+                          [
+                            ['x', '台外幣總存款', '放款總餘額','最近一個月平均餘額',
+                            '最近三個月平均餘額', '最近六個月平均餘額',
+                            '最近一年平均餘額'],
+                            // ['value',100,300]
+                            [`元`, response.data[0]['台外幣總存款'],
+                             response.data[0]['放款總餘額(L+PB+CK)'], 
+                             response.data[0]['最近一個月平均餘額(台外幣總存款)'],
+                             response.data[0]['最近三個月平均餘額(台外幣總存款)'],
+                             response.data[0]['最近六個月平均餘額(台外幣總存款)'],
+                             response.data[0]['最近一年平均餘額(台外幣總存款)']
+                             ]
+                          ],
+                    type: 'bar'
+                    },
+                    axis: {
+                      rotated: true,
+                      x: {
+                        type: 'category'
+                      }
+                    }
+                  }
+                  );
+                }
 
-                    // d3.select(".tooltip").text(companyToString(response.data[0]));
-                  });
-          // getCompany($http, d.id);
+              })
+              if (d3.select("#title") !== null){
+                  d3.select("#title").remove();
+                  }   
+              d3.select(".propertyChart").append("text")
+                  .attr("id","title")
+                  .attr("x", 100 )
+                  .attr("y", 150)
+                  .style("text-anchor", "middle")
+                  .text(`${Company}`);
         }
+
+        // Create Event Handlers for mouse
+      function handleMouseOver(d, i) {  // Add interactivity
+
+        // define div for tooltips 
+        var div = d3.select("body").append("div") 
+          .attr("class", "tooltip")       
+          .style("opacity", 0);
+
+
+        $http.get("http://localhost:5000/company/"+d.id)
+              .then(function(response) {
+               // console.log("response: "+JSON.stringify(response.data[0]));
+
+                var company_data = companyToString(response.data[0]);
+
+                  // 
+                console.log(JSON.stringify(company_data));
+
+                div.transition()
+                    .duration(100)
+                    .style("opacity",.9);
+                div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
+                          +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
+                    .style("left", (d.x) + "px")                
+                    .style("top", (d.y - 28) + "px")
+                    .style("width", "470px")                        
+                    .style("height", (company_data[1]*18 + 100) +"px" );          
+                });
+        
+      }
 
       });
 
@@ -192,21 +287,27 @@ function MainCtrl($scope, $http){
   $scope.getGraph($scope.ID);
 }
 
+
+/**********************************************/
+/***************輔助函數***********************/
+/**********************************************/
+
 /** event Handlers */
-// action to take on mouse click
-function click() {
-  d3.select(this).select("text").transition()
-  .duration(750)
-  .attr("x", 22)
-  .style("fill", "steelblue")
-  .style("stroke", "lightsteelblue")
-  .style("stroke-width", ".5px")
-  .style("font", "20px sans-serif");
-  d3.select(this).select("circle").transition()
-  .duration(750)
-  .attr("r", 16)
-  .style("fill", "lightsteelblue");
-}
+
+// // action to take on mouse click
+// function click() {
+//   d3.select(this).select("text").transition()
+//   .duration(750)
+//   .attr("x", 22)
+//   .style("fill", "steelblue")
+//   .style("stroke", "lightsteelblue")
+//   .style("stroke-width", ".5px")
+//   .style("font", "20px sans-serif");
+//   d3.select(this).select("circle").transition()
+//   .duration(750)
+//   .attr("r", 16)
+//   .style("fill", "lightsteelblue");
+// }
 
 // action to take on mouse double click
 function dblclick() {
@@ -235,24 +336,8 @@ function handleMouseOut(d, i) {
 
 
 
-//help method
-// function companyToString(response){
-//   var print = "";
-//   for(var index in response) {
-//     console.log(index);
-//     if (response.hasOwnProperty(index)) {
-//       var value = response[index];
-      
-//       if (index==='董監事名單' && response['董監事名單']!= null){
-//         for (var index in response['董監事名單']){
-//           var value = response['董監事名單'][index];
-//           print += index + " : " + value + "<br/>";
-//         }
-//       }
-//     }
-//   }
-//   return print;
-// }
+/**輔助列印公司資訊 */ 
+
 
 function companyToString(response){
   // console.log("json.stringify type:"+JSON.stringify(response));
@@ -268,3 +353,4 @@ function companyToString(response){
   var height = pprint.split('<br/>').length;
   return [pprint , height]; //return pprint and 'height' of data
 }
+
