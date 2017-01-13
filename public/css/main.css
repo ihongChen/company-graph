@@ -1,7 +1,7 @@
-div.propertyChart{
+/*div.propertyChart{
   width:700px;
   height:300px;
-}
+}*/
 
 path.link {
   fill: none;
@@ -25,16 +25,17 @@ path.link.onezerozero {
   opacity: 1.0;
 }
 
-circle {
+.node circle {
   fill: #ccc;
   stroke: #fff;
   stroke-width: 1.5px;
 }
 
-text {
+.node text {
   fill: #000;
   font: 10px sans-serif;
   pointer-events: none;
+  opacity:0 ;
 }
 
 
@@ -49,4 +50,8 @@ div.tooltip {
     border: 2px;    
     border-radius: 8px;     
     pointer-events: none;     
+}
+
+.c3-axis-y .tick {
+   display: none;
 }

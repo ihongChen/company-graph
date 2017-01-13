@@ -6,10 +6,10 @@ var sql=require('mssql');
 
 // database config
 var config = {
-    user: 'xxxx',
-    password: 'xxxxxxxx',
-    server: 'xxxxxxx',
-    database: 'xxxxxxx',
+    user: 'xxxxxx',
+    password: 'xxxx',
+    server: 'xxxxx',
+    database: 'xxxxxx',
     options: {
         tdsVersion:'7_1',
         encrypt: false 

@@ -7,11 +7,13 @@ var app = angular.module("companyGraph", []);
 
 function MainCtrl($scope, $http){
 
-  $scope.ID = "86517384";
+  $scope.ID = "22099131";
 
   $scope.getGraph = function(ID){
     // var hostUrl = "http://localhost:5000/fakeGraph?id=86517384";
     var hostUrl = "http://localhost:5000/q" + "?id=" + ID;
+
+
     d3.json(hostUrl,function(err,links){
       var nodes = {};
 
@@ -28,16 +30,16 @@ function MainCtrl($scope, $http){
       console.log("nodes: " + JSON.stringify(nodes));
       // console.log(links);
 
-      var width = 750,
+      var width = 1000,
           height = 500;
 
       var force = d3.layout.force()
                   .nodes(d3.values(nodes))
-                  .gravity(.05)
+                  .gravity(0.5)
                   .links(links)
                   .size([width,height])
                   .linkDistance(100)
-                  .charge(-350)                                    
+                  .charge(-700)                                    
                   .on('tick',tick)
                   .start();
 
@@ -93,13 +95,15 @@ function MainCtrl($scope, $http){
       });
       // remove svg if exist ...
       if (d3.select("svg") !== null){
-        d3.select("svg").remove();
+        d3.select("#graphC").remove();
       }
 
       var svg = d3.select(".graphChart")
+
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("id","graphC");
       // build the arrow.
       svg.append("svg:defs").selectAll("marker")
       .data(["end"])      // Different link/path types can be defined here
@@ -137,8 +141,11 @@ function MainCtrl($scope, $http){
 
       // add the nodes
       node.append("circle")
-      .attr("r", 5);
-
+      .attr("r", 5)
+      .style("fill",function(d){
+        if (d.id === ID) return "steelblue";
+        // console.log("d.id in circle:"+d.id==ID);
+      });
       // add the text
       node.append("text")
       .attr("x", 12)
@@ -166,13 +173,14 @@ function MainCtrl($scope, $http){
       }
 
 
-      // action to take on mouse click
+      // 滑鼠點擊觸發事件.....(click)
       function click() {
         d3.select(this).select("text").transition()
-        .duration(750)
+        .duration(750)        
         .attr("x", 22)
         .style("fill", "steelblue")
-        .style("stroke", "lightsteelblue")
+        .style("opacity","1")
+        .style("stroke", "lightsteelblue")      
         .style("stroke-width", ".5px")
         .style("font", "20px sans-serif");
         d3.select(this).select("circle").transition()
@@ -182,74 +190,46 @@ function MainCtrl($scope, $http){
 
         // 行內資訊查詢
         if (d3.select(".property") !== null){
-          d3.select(".property").remove();
-          }
+          d3.select(".property").remove(); //有圖則移除
+        }
         d3.select(".propertyChart")
            .append("div")
-           // .style("width",500)
-           // .style("height",300)
            .attr("class","property");
 
           
                 // .style("opacity",0)
         console.log('this:'+JSON.stringify(this));
         var Company = this.__data__.name;
-        console.log("Company :"+JSON.stringify(Company));
+
+        d3.select(".propertyChart h3")
+          .text(this.__data__.id+' 於本行帳戶');
+        // console.log("Company :"+JSON.stringify(Company));
         $http.get("http://localhost:5000/property/"+this.id.trim())
-              .then(function(response){
-                console.log("response: " + JSON.stringify(response));
-                console.log("response.data:"+ JSON.stringify(response.data));
-                // div.html(respnose.data);
-                console.log("response.data['台外幣總存款']:" + response.data[0]['台外幣總存款'] )
-                if (response.data !== undefined){
+              .then(plotCompanyProperty)
+      }
 
-                  var chart = c3.generate({
-                    bindto: '.property',
-                    padding: {
-                              left: 100,
-                              top : 10
-                            },
-                    data: {
-                    x: 'x',
-                    columns:
-                          [
-                            ['x', '台外幣總存款', '放款總餘額','最近一個月平均餘額',
-                            '最近三個月平均餘額', '最近六個月平均餘額',
-                            '最近一年平均餘額'],
-                            // ['value',100,300]
-                            [`元`, response.data[0]['台外幣總存款'],
-                             response.data[0]['放款總餘額(L+PB+CK)'], 
-                             response.data[0]['最近一個月平均餘額(台外幣總存款)'],
-                             response.data[0]['最近三個月平均餘額(台外幣總存款)'],
-                             response.data[0]['最近六個月平均餘額(台外幣總存款)'],
-                             response.data[0]['最近一年平均餘額(台外幣總存款)']
-                             ]
-                          ],
-                    type: 'bar'
-                    },
-                    axis: {
-                      rotated: true,
-                      x: {
-                        type: 'category'
-                      }
-                    }
-                  }
-                  );
-                }
 
-              })
-              if (d3.select("#title") !== null){
-                  d3.select("#title").remove();
-                  }   
-              d3.select(".propertyChart").append("text")
-                  .attr("id","title")
-                  .attr("x", 100 )
-                  .attr("y", 150)
-                  .style("text-anchor", "middle")
-                  .text(`${Company}`);
-        }
+		  // 滑鼠雙擊事件(double click) //
 
-        // Create Event Handlers for mouse
+      function dblclick() {
+        d3.select(this).select("circle").transition()
+  		  .duration(750)
+  		  .attr("r", 6)
+  			.style("fill", function(d){
+    		  if (d.id===ID) return "steelblue";
+  		  	return "#ccc";
+  		  });
+  
+    		d3.select(this).select("text").transition()
+    		.duration(750)
+    		.style("opacity","0.2")
+    		.attr("x", 12)
+    		.style("stroke", "none")
+    		.style("fill", "black")
+    		.style("stroke", "none")
+    		.style("font", "10px sans-serif");
+      }
+      // 滑鼠移到node上的事件...
       function handleMouseOver(d, i) {  // Add interactivity
 
         // define div for tooltips 
@@ -259,32 +239,38 @@ function MainCtrl($scope, $http){
 
 
         $http.get("http://localhost:5000/company/"+d.id)
-              .then(function(response) {
-               // console.log("response: "+JSON.stringify(response.data[0]));
+        .then(function(response) {
+         // console.log("response: "+JSON.stringify(response.data[0]));
 
-                var company_data = companyToString(response.data[0]);
+            var company_data = companyToString(response.data[0]);
 
-                  // 
-                console.log(JSON.stringify(company_data));
+              // 
+            console.log(JSON.stringify(company_data));
 
-                div.transition()
-                    .duration(100)
-                    .style("opacity",.9);
-                div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
-                          +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
-                    .style("left", (d.x) + "px")                
-                    .style("top", (d.y - 28) + "px")
-                    .style("width", "470px")                        
-                    .style("height", (company_data[1]*18 + 100) +"px" );          
-                });
-        
-      }
+            div.transition()
+                .duration(100)
+                .style("opacity",.9);
+            div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
+                      +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
+                .style("left", (d.x) + "px")                
+                .style("top", (d.y - 28) + "px")
+                .style("width", "500px")                        
+                .style("height", (company_data[1]*22 + 150) +"px" );          
+            });        
+      } //end of handleMouseOver
 
-      });
+      d3.select(".propertyChart h3")
+       .text(ID +' 於本行帳戶');
+
+    }); // end of d3.json(...)
+    
+    
+  $http.get("http://localhost:5000/property/"+$scope.ID.trim()).then(plotCompanyProperty);
 
   }
 
   $scope.getGraph($scope.ID);
+  
 }
 
 
@@ -294,36 +280,9 @@ function MainCtrl($scope, $http){
 
 /** event Handlers */
 
-// // action to take on mouse click
-// function click() {
-//   d3.select(this).select("text").transition()
-//   .duration(750)
-//   .attr("x", 22)
-//   .style("fill", "steelblue")
-//   .style("stroke", "lightsteelblue")
-//   .style("stroke-width", ".5px")
-//   .style("font", "20px sans-serif");
-//   d3.select(this).select("circle").transition()
-//   .duration(750)
-//   .attr("r", 16)
-//   .style("fill", "lightsteelblue");
-// }
 
-// action to take on mouse double click
-function dblclick() {
-  d3.select(this).select("circle").transition()
-  .duration(750)
-  .attr("r", 6)
-  .style("fill", "#ccc");
-  d3.select(this).select("text").transition()
-  .duration(750)
-  .attr("x", 12)
-  .style("stroke", "none")
-  .style("fill", "black")
-  .style("stroke", "none")
-  .style("font", "10px sans-serif");
-}
 
+// 滑鼠離開事件 //
 function handleMouseOut(d, i) {
   // Select text by id and then remove
   var idTag = "#t" + d.x + "-" + d.y + "-" + i;
@@ -354,3 +313,56 @@ function companyToString(response){
   return [pprint , height]; //return pprint and 'height' of data
 }
 
+/**繪圖:本行存餘款資訊*/
+function plotCompanyProperty(response){
+
+
+  d3.select(".propertyChart")
+    .append("div")
+    .attr("class","property");
+  console.log("plotCompanyProperty response.data:"+JSON.stringify(response.data));
+  if (response.data !== undefined){
+
+    var chart = c3.generate({
+      bindto: '.property',
+      padding: {
+                left: 100,
+                top : 10
+              },
+      data: {
+      x: 'x',
+      columns:
+            [
+              ['x', '台外幣總存款', '放款總餘額','最近一個月平均餘額',
+              '最近三個月平均餘額', '最近六個月平均餘額',
+              '最近一年平均餘額'],
+              // ['value',100,300]
+              [`存款(元)`, response.data[0]['台外幣總存款'],
+               null, 
+               response.data[0]['最近一個月平均餘額(台外幣總存款)'],
+               response.data[0]['最近三個月平均餘額(台外幣總存款)'],
+               response.data[0]['最近六個月平均餘額(台外幣總存款)'],
+               response.data[0]['最近一年平均餘額(台外幣總存款)']
+               ],
+               [`放款(元)`,
+               null,
+               response.data[0]['放款總餘額(L+PB+CK)'],
+               null,
+               null,
+               null,
+               null
+               ]
+            ],
+      type: 'bar'
+      },
+      axis: {
+        rotated: true,
+        x: {
+          type: 'category'
+        }
+      }
+    }
+    );    
+  }
+
+}
