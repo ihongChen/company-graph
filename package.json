@@ -24,7 +24,9 @@
   "homepage": "https://github.com/ihongChen/company-graph#readme",
   "dependencies": {
     "async": "^2.1.4",
+    "bootstrap": "^3.3.7",
     "express": "^4.14.0",
+    "jquery": "^3.1.1",
     "mssql": "^3.3.0"
   }
 }
