@@ -168,7 +168,7 @@ function getCompanyInfo(id,mCallback){
         })
       }
     ],function(err,results){
-      console.log(results);
+      // console.log('getCompanyInfo:'+ans);
       mCallback(err,ans);
     }
   );
@@ -185,7 +185,12 @@ function sqlOwn(seedid){
   }
   var sql_own =
   `
-  select a.ID targetId, a.公司名稱 target, b.所代表法人ID sourceId, b.所代表法人 source,count(*) value
+  select 
+    a.ID targetId,
+    a.公司名稱 target,  
+    b.所代表法人ID sourceId,
+    b.所代表法人 source,
+    count(*) value
   from
   公司法人資料 a
   left join 公司董監事 b
@@ -202,7 +207,11 @@ function sqlBelong(seedid){
   }
   var sql_temp =
   `
-  select a.ID targetId ,a.公司名稱 target, b.所代表法人ID sourceId,b.所代表法人 source ,count(*) value
+  select a.ID targetId,
+    a.公司名稱 target,    
+    b.所代表法人ID sourceId,
+    b.所代表法人 source ,
+    count(*) value
   from
   公司法人資料 a
   left join 公司董監事 b
@@ -229,7 +238,13 @@ function sqlCompanyInfo(seedid){
 
   var sql_company_info = 
   `
-  select 公司名稱,公司所在地
+  select 
+    公司所在地,
+    [資本總額(元)],
+    公司狀況,
+    核准設立日期,
+    所營事業資料,
+    最後核准變更日期    
   from 
   公司法人資料
   where ID = '${seedid}'

@@ -28,10 +28,13 @@ function MainCtrl($scope, $http){
         link.value = +link.value;
       });
       console.log("nodes: " + JSON.stringify(nodes));
-      // console.log(links);
+      console.log("links:"+JSON.stringify(links));
 
       var width = 1000,
           height = 500;
+      var rMin = 5;
+      		rMax = 20;
+
 
       var force = d3.layout.force()
                   .nodes(d3.values(nodes))
@@ -78,8 +81,13 @@ function MainCtrl($scope, $http){
 
       // set the range
       var v = d3.scale.linear().range([0, 100]);
+      // var rScale = d3.scale.sqrt().range([rMin,rMax]);
+
       // Scale the range of the data
       v.domain([0, d3.max(links, function(d) { return d.value; })]);
+
+      // rScale.domain(d3.extent(d3.values(nodes), function (d){return d.capital;}));
+
       // asign a type per value to encode opacity
       links.forEach(function(link) {
         
@@ -141,10 +149,10 @@ function MainCtrl($scope, $http){
 
       // add the nodes
       node.append("circle")
-      .attr("r", 5)
+      // .attr("r", function(d){return rScale(d.capital);})
+      .attr("r",10)
       .style("fill",function(d){
-        if (d.id === ID) return "steelblue";
-        // console.log("d.id in circle:"+d.id==ID);
+        if (d.id === ID) return "steelblue";        
       });
       // add the text
       node.append("text")
@@ -242,21 +250,22 @@ function MainCtrl($scope, $http){
         .then(function(response) {
          // console.log("response: "+JSON.stringify(response.data[0]));
 
-            var company_data = companyToString(response.data[0]);
-
+            var companyDirector_data = companyDirectorToString(response.data[0]);
+            var companySetupInfo_data = companySetupInfoToString(response.data[0]);
               // 
-            console.log(JSON.stringify(company_data));
+            // console.log(JSON.stringify(companyDirector_data));
 
             div.transition()
                 .duration(100)
                 .style("opacity",.9);
             div.html("<h2>" + d.name + "(" + d.id +")" + "</h2>"  
-                      +"<h3>" +"董監事名單" + "</h3>"  + company_data[0])
-                .style("left", (d.x) + "px")                
+            					+ "<h3>基本資料</h3>" + companySetupInfo_data
+                      +"<h3>" +"董監事名單" + "</h3>"  + companyDirector_data[0])
+                .style("left", (d.x) + "px")
                 .style("top", (d.y - 28) + "px")
-                .style("width", "500px")                        
-                .style("height", (company_data[1]*22 + 150) +"px" );          
-            });        
+                .style("width", "500px")
+                .style("height", (companyDirector_data[1]*22 + 350) +"px" );
+            });
       } //end of handleMouseOver
 
       d3.select(".propertyChart h3")
@@ -292,15 +301,17 @@ function handleMouseOut(d, i) {
 }
 
 
-
-
+/**$$千位數加逗號*/
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 /**輔助列印公司資訊 */ 
 
 
-function companyToString(response){
+function companyDirectorToString(response){
   // console.log("json.stringify type:"+JSON.stringify(response));
-  var pprint = "";
+  var pprint = "";  
   for(var index in response['董監事名單']){
     var director = response['董監事名單'][index];
     var print = 
@@ -312,6 +323,26 @@ function companyToString(response){
   var height = pprint.split('<br/>').length;
   return [pprint , height]; //return pprint and 'height' of data
 }
+
+
+function companySetupInfoToString(response){
+	var pprint = "";
+
+	pprint  = 
+						'<h5>資本總額: '  + numberWithCommas(response['資本總額(元)']) + '</h5>' +
+						'<h6>公司所在地: '+ response['公司所在地'] + '</h6>' +
+						
+						'<h6>公司狀況: '  + response['公司狀況'] + '</h6>' + 
+						'<h6>設立日期: '  + response['核准設立日期'].slice(0,10) + '</h6>' +
+						'<h6>最後核准變更日期: ' + response['最後核准變更日期'].slice(0,10) + '</h6>' + 
+						'<h6>所營事業資料:<br/> '  + response['所營事業資料'].replace(/\//g,' ') + '</h6>';
+	var height = pprint.length
+	return pprint
+}
+
+
+
+
 
 /**繪圖:本行存餘款資訊*/
 function plotCompanyProperty(response){
