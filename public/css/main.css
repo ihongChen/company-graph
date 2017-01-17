@@ -1,0 +1,52 @@
+div.propertyChart{
+  width:700px;
+  height:300px;
+}
+
+path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+path.link.twofive {
+  opacity: 0.25;
+}
+
+path.link.fivezero {
+  opacity: 0.50;
+}
+
+path.link.sevenfive {
+  opacity: 0.75;
+}
+
+path.link.onezerozero {
+  opacity: 1.0;
+}
+
+circle {
+  fill: #ccc;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+text {
+  fill: #000;
+  font: 10px sans-serif;
+  pointer-events: none;
+}
+
+
+div.tooltip { 
+    position: absolute;     
+    text-align: left;     
+    /*width: 500px;          */
+ /*   height: 100px;         */
+    padding: 10px;       
+    font: 12px sans-serif;    
+    background: #C0C0C0; 
+    border: 2px;    
+    border-radius: 8px;     
+    pointer-events: none;     
+}

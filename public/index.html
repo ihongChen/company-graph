@@ -1,7 +1,46 @@
 <!DOCTYPE html>
-<html>
-  <meta charset="utf-8">
-  <body>
-    <h2>Hello... Company-Graph</h2>
+
+<html ng-app="companyGraph">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <title>公司關係圖</title>
+    <!-- c3js -->
+    <link href="/css/c3.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+
+  <body ng-controller="MainCtrl">
+    <div class="container">
+      <div class="page-header">
+        <h1>公司關係圖</h1>
+      </div>
+      <form class="form-inline">
+        <div class="form-group">
+          <label for="text">公司統編:</label>
+          <input class="form-control" type=text placeholder="輸入統一編號" ng-model="ID">
+        </div>
+        <button type="submit" class="btn btn-default" ng-click="getGraph(ID)">搜尋</button>
+      </form>
+
+      <div class="row">
+        <div class="col align-self-start" class= "graphChart">one of three columns</div>
+        <div class="col align-self-center">hello aasddddddddddddddddddddddddd</div>        
+        <div class="col align-self-end" class="propertyChart" >one of three columns</div>
+      </div>
+      <!-- <div class="row">
+
+      </div> -->
+
+
+    </div>
+
+    <script src="./c3.js"></script>
+    <script src="graph_d3.js"></script>
   </body>
 </html>
+<!-- style="width:700px;height:300px;" -->
