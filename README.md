@@ -6,7 +6,7 @@
 * [x] 引用資料庫資料(nodejs-API設計)
 * [x] 查詢視窗/前端串接/資料綁定
 * [x] seedid上色
-* [ ] drag and zoom 
+* [x] drag and zoom 
 * [x] 間距調整/比例
 * [x] 各公司資料框
     - [x] 資料綁定(董監事)

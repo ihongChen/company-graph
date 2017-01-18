@@ -87,7 +87,7 @@ function MainCtrl($scope, $http){
       }
 
       function zoomed(){
-      	svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+      	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
       }
       //*****************************//
 
@@ -124,15 +124,17 @@ function MainCtrl($scope, $http){
         d3.select("#graphC").remove();
       }
 
-      var svg = d3.select(".graphChart")
-
+      var svg = d3.select(".graphChart")            
       .append("svg")
       .attr("width", width)
       .attr("height", height)
       .attr("id","graphC")
       .call(zoom);
+
+      var container = svg.append("g");
       // build the arrow.
-      svg.append("svg:defs").selectAll("marker")
+      container
+      .append("svg:defs").selectAll("marker")
       .data(["end"])      // Different link/path types can be defined here
       .enter().append("svg:marker")    // This section adds in the arrows
       .attr("id", String)
@@ -146,14 +148,14 @@ function MainCtrl($scope, $http){
       .attr("d", "M0,-5L10,0L0,5");
 
       // add the links and the arrows
-      var path = svg.append("svg:g").selectAll("path")
+      var path = container.append("svg:g").selectAll("path")
       .data(force.links())
       .enter().append("svg:path")
       .attr("class", function(d) { return "link " + d.type; })
       .attr("marker-end", "url(#end)");
 
       // define the nodes
-      var node = svg.selectAll(".node")
+      var node = container.selectAll(".node")
       .data(force.nodes())
       .enter().append("g")
       .attr("class", "node")
