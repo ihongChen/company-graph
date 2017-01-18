@@ -187,16 +187,20 @@ function sqlOwn(seedid){
   `
   select 
     a.ID targetId,
-    a.公司名稱 target,  
+    a.公司名稱 target,
+    a.[資本總額(元)] targetCapital,
     b.所代表法人ID sourceId,
     b.所代表法人 source,
+    c.[資本總額(元)] sourceCapital,    
     count(*) value
   from
-  公司法人資料 a
+    公司法人資料 a
   left join 公司董監事 b
-  on a.ID = b.ID
+    on a.ID = b.ID
+    left join 公司法人資料 c
+      on c.ID = b.所代表法人ID
   where b.所代表法人ID in ('${seedid}')
-  group by a.ID,a.公司名稱,b.所代表法人 ,b.所代表法人ID
+  group by a.ID,a.公司名稱,b.所代表法人 ,b.所代表法人ID,a.[資本總額(元)],c.[資本總額(元)]
   `;
   return sql_own;
 }
@@ -208,16 +212,20 @@ function sqlBelong(seedid){
   var sql_temp =
   `
   select a.ID targetId,
-    a.公司名稱 target,    
+    a.公司名稱 target,
+    a.[資本總額(元)] targetCapital,
     b.所代表法人ID sourceId,
-    b.所代表法人 source ,
+    b.所代表法人 source,
+    c.[資本總額(元)] sourceCapital,
     count(*) value
   from
   公司法人資料 a
   left join 公司董監事 b
-  on a.ID = b.ID
+    on a.ID = b.ID
+    left join 公司法人資料 c 
+      on c.ID = b.所代表法人ID
   where a.ID in ('${seedid}')
-  group by a.ID,a.公司名稱,b.所代表法人 ,b.所代表法人ID
+  group by a.ID,a.公司名稱,b.所代表法人 ,b.所代表法人ID,a.[資本總額(元)],c.[資本總額(元)]
   `;
   return sql_temp;
 }

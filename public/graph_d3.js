@@ -22,16 +22,16 @@ function MainCtrl($scope, $http){
       links.forEach(function(link){
         // console.log(link.source);
         link.source = nodes[link.source] ||
-        (nodes[link.source] = {name: link.source, id: link.sourceId});
+        (nodes[link.source] = {name: link.source, id: link.sourceId, capital:link.sourceCapital});
         link.target = nodes[link.target] ||
-        (nodes[link.target] = {name: link.target, id: link.targetId});
+        (nodes[link.target] = {name: link.target, id: link.targetId, capital:link.targetCapital});
         link.value = +link.value;
       });
       console.log("nodes: " + JSON.stringify(nodes));
       console.log("links:"+JSON.stringify(links));
 
-      var width = 1000,
-          height = 500;
+      var width = 750,
+          height = 400;
       var rMin = 5;
       		rMax = 20;
 
@@ -45,6 +45,12 @@ function MainCtrl($scope, $http){
                   .charge(-700)                                    
                   .on('tick',tick)
                   .start();
+
+      //******放大效果(zoom in)  ******//      
+			var zoom = d3.behavior.zoom()
+			    .scaleExtent([1, 10])
+			    .on("zoom", zoomed);
+
 
       //******節點拖拉特效  ******//
 
@@ -61,6 +67,7 @@ function MainCtrl($scope, $http){
         .on("dragend", dragend);
 
       function dragstart(d, i) {
+      	d3.event.sourceEvent.stopPropagation();      	
         force.stop() // stops the force auto positioning before you start dragging
       }
 
@@ -70,23 +77,34 @@ function MainCtrl($scope, $http){
         d.x += d3.event.dx;
         d.y += d3.event.dy; 
         tick(); // this is the key to make it work together with updating both px,py,x,y on d !
+        // d3.select(this)
       }
 
       function dragend(d, i) {
         d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
-        tick();
-        force.resume();
+        tick();        
+        // force.resume();
+      }
+
+      function zoomed(){
+      	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
       }
       //*****************************//
 
       // set the range
       var v = d3.scale.linear().range([0, 100]);
-      // var rScale = d3.scale.sqrt().range([rMin,rMax]);
+      var rScale = d3.scale.sqrt().range([rMin,rMax]);
 
       // Scale the range of the data
       v.domain([0, d3.max(links, function(d) { return d.value; })]);
 
-      // rScale.domain(d3.extent(d3.values(nodes), function (d){return d.capital;}));
+      rScale.domain([0,100000000000])
+      // rScale.domain([0,d3.max(nodes,function(d){
+      // 	if (d.capital == null){
+      // 		return 1000000;
+      // 	}
+      // 	return d.capital;
+      // })])
 
       // asign a type per value to encode opacity
       links.forEach(function(link) {
@@ -106,35 +124,38 @@ function MainCtrl($scope, $http){
         d3.select("#graphC").remove();
       }
 
-      var svg = d3.select(".graphChart")
-
+      var svg = d3.select(".graphChart")            
       .append("svg")
       .attr("width", width)
       .attr("height", height)
-      .attr("id","graphC");
+      .attr("id","graphC")
+      .call(zoom);
+
+      var container = svg.append("g");
       // build the arrow.
-      svg.append("svg:defs").selectAll("marker")
+      container
+      .append("svg:defs").selectAll("marker")
       .data(["end"])      // Different link/path types can be defined here
       .enter().append("svg:marker")    // This section adds in the arrows
       .attr("id", String)
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 15)
-      .attr("refY", -1.5)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
+      .attr("refX", 45)
+      .attr("refY", -5.0)
+      .attr("markerWidth", 4)
+      .attr("markerHeight", 8)
       .attr("orient", "auto")
       .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
 
       // add the links and the arrows
-      var path = svg.append("svg:g").selectAll("path")
+      var path = container.append("svg:g").selectAll("path")
       .data(force.links())
       .enter().append("svg:path")
       .attr("class", function(d) { return "link " + d.type; })
       .attr("marker-end", "url(#end)");
 
       // define the nodes
-      var node = svg.selectAll(".node")
+      var node = container.selectAll(".node")
       .data(force.nodes())
       .enter().append("g")
       .attr("class", "node")
@@ -149,11 +170,21 @@ function MainCtrl($scope, $http){
 
       // add the nodes
       node.append("circle")
-      // .attr("r", function(d){return rScale(d.capital);})
-      .attr("r",10)
+      // .attr("r",5)
       .style("fill",function(d){
         if (d.id === ID) return "steelblue";        
-      });
+      })
+      .attr("r", function(d){
+      	console.log(JSON.stringify(d));
+      	if (d.capital == null){
+      		console.log('null: return '+5) 
+      		return 5
+      	}else {
+      		console.log('rScale(d.capital):'+rScale(d.capital));
+      		return rScale(d.capital);
+      	}
+      })      
+      ;
       // add the text
       node.append("text")
       .attr("x", 12)
@@ -193,7 +224,7 @@ function MainCtrl($scope, $http){
         .style("font", "20px sans-serif");
         d3.select(this).select("circle").transition()
         .duration(750)
-        .attr("r", 16)
+        // .attr("r", 25)
         .style("fill", "lightsteelblue");
 
         // 行內資訊查詢
@@ -222,7 +253,13 @@ function MainCtrl($scope, $http){
       function dblclick() {
         d3.select(this).select("circle").transition()
   		  .duration(750)
-  		  .attr("r", 6)
+  		  .attr("r", function(d){
+  		  	if (d.capital == null){
+  		  		return 5
+  		  	}else{
+  		  		return rScale(d.capital);
+  		  	}
+  		  })
   			.style("fill", function(d){
     		  if (d.id===ID) return "steelblue";
   		  	return "#ccc";
