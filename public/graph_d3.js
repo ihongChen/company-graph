@@ -49,7 +49,8 @@ function MainCtrl($scope, $http){
       //******放大效果(zoom in)  ******//      
 			var zoom = d3.behavior.zoom()
 			    .scaleExtent([1, 10])
-			    .on("zoom", zoomed);
+			    .on("zoom", zoomed)
+			    ;
 
 
       //******節點拖拉特效  ******//
@@ -87,7 +88,8 @@ function MainCtrl($scope, $http){
       }
 
       function zoomed(){
-      	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+      	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")")
+      	;
       }
       //*****************************//
 
@@ -129,7 +131,8 @@ function MainCtrl($scope, $http){
       .attr("width", width)
       .attr("height", height)
       .attr("id","graphC")
-      .call(zoom);
+      .call(zoom)
+      .on("dblclick.zoom",null);
 
       var container = svg.append("g");
       // build the arrow.
